@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10172a">
+  <title>Memória Cósmica</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: #10172a; color: #f5f7ff; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; min-height: 100dvh; padding: 20px; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 0%, #27345b 0, #10172a 68%); }
+    button { font: inherit; }
+    .app { width: min(100%, 600px); text-align: center; }
+    .screen[hidden] { display: none; }
+    .eyebrow { margin: 0 0 6px; color: #9db3ff; font-size: .75rem; font-weight: 850; letter-spacing: .2em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(2.4rem, 10vw, 4.4rem); line-height: .98; letter-spacing: -.06em; }
+    h2 { margin: 0; font-size: clamp(1.6rem, 6vw, 2.2rem); letter-spacing: -.04em; }
+    .subtitle { max-width: 430px; margin: 14px auto 26px; color: #bdc7e3; line-height: 1.5; }
+    .hero-icon { display: grid; place-items: center; width: 112px; height: 112px; margin: 0 auto 20px; border: 1px solid #596b9c; border-radius: 32px; background: linear-gradient(145deg, #334779, #202e51); box-shadow: 0 15px 35px #080e20aa; font-size: 3.6rem; transform: rotate(-5deg); }
+    .menu-options { display: grid; gap: 13px; width: min(100%, 390px); margin: 0 auto; }
+    .menu-card { display: flex; align-items: center; gap: 15px; width: 100%; padding: 17px; border: 1px solid #40517b; border-radius: 18px; background: #1a2541; color: inherit; text-align: left; cursor: pointer; transition: transform .16s, border-color .16s, background .16s; }
+    .menu-card:hover { transform: translateY(-2px); border-color: #8ba0f6; background: #202e50; }
+    .menu-icon { display: grid; flex: 0 0 48px; width: 48px; height: 48px; place-items: center; border-radius: 14px; background: #2d3d68; font-size: 1.6rem; }
+    .menu-copy strong { display: block; font-size: 1.05rem; }
+    .menu-copy small { display: block; margin-top: 3px; color: #bac6e7; font-size: .83rem; line-height: 1.35; }
+    .footnote { margin: 22px 0 0; color: #8795ba; font-size: .78rem; }
+    .topline { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
+    .back-button { padding: 9px 13px; border: 1px solid #42527a; border-radius: 999px; background: #192440; color: #eef1ff; font-weight: 700; cursor: pointer; }
+    .topline .eyebrow { margin: 0; }
+    .campaign-intro { margin: 9px 0 20px; color: #bdc7e3; }
+    .levels { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; }
+    .chapter { margin: 24px 0 8px; color: #9db3ff; font-size: .85rem; font-weight: 850; letter-spacing: .1em; text-align: left; text-transform: uppercase; }
+    .chapter:first-child { margin-top: 0; }
+    .session-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 16px; }
+    .session-nav strong { flex: 1; color: #9db3ff; font-size: .86rem; letter-spacing: .08em; text-transform: uppercase; }
+    .session-arrow { display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid #52658f; border-radius: 50%; background: #1a2541; color: #fff; font-size: 1.7rem; cursor: pointer; }
+    .session-arrow[hidden] { display: none; }
+    .session-arrow:hover { border-color: #ffd166; color: #ffd166; }
+    .level { position: relative; min-height: 86px; padding: 12px 5px; border: 1px solid #40517b; border-radius: 16px; background: #1a2541; color: #f5f7ff; cursor: pointer; transition: transform .15s, border-color .15s; }
+    .level:hover:not(:disabled) { transform: translateY(-2px); border-color: #9aabff; }
+    .level:disabled { cursor: not-allowed; opacity: .48; filter: saturate(.6); }
+    .level.completed { border-color: #50d9ae; background: #173b3b; }
+    .level-number { display: block; color: #aebadb; font-size: .7rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .level-name { display: block; margin-top: 4px; font-weight: 800; }
+    .level-mark { position: absolute; top: 5px; right: 8px; color: #76efc1; }
+    .section-label { margin: 18px 0 8px; color: #aebadb; font-size: .78rem; font-weight: 750; text-transform: uppercase; letter-spacing: .08em; }
+    .free-settings { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 9px; margin: 20px auto 13px; }
+    .choice { padding: 8px 13px; border: 1px solid #465780; border-radius: 999px; background: #1a2541; color: #e6ebff; cursor: pointer; }
+    .choice[aria-pressed="true"] { border-color: #ffd166; background: #443b2d; color: #ffe2a0; }
+    .primary { padding: 12px 21px; border: 0; border-radius: 999px; background: #ffd166; color: #20233a; font-weight: 850; cursor: pointer; box-shadow: 0 4px 0 #bd8e2b; }
+    .primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #bd8e2b; }
+    .game-title { margin: 0; font-size: clamp(1.4rem, 6vw, 2rem); }
+    .game-subtitle { margin: 4px 0 15px; color: #bdc7e3; font-size: .9rem; }
+    .stats { display: flex; justify-content: center; gap: 10px; margin: 0 auto 15px; }
+    .stat { min-width: 91px; padding: 8px 12px; border: 1px solid #36446a; border-radius: 13px; background: #18223b; }
+    .stat span { display: block; color: #aebadb; font-size: .67rem; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
+    .stat strong { display: block; margin-top: 2px; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+    .board { --columns: 4; display: grid; grid-template-columns: repeat(var(--columns), minmax(0, 1fr)); gap: clamp(5px, 1.7vw, 10px); width: min(100%, 500px); margin: 0 auto; perspective: 900px; }
+    .card { position: relative; aspect-ratio: 1; min-width: 0; padding: 0; border: 0; border-radius: clamp(10px, 3vw, 17px); background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; transform-style: preserve-3d; transition: transform .28s ease; }
+    .card:focus-visible, .back-button:focus-visible, .level:focus-visible, .menu-card:focus-visible, .primary:focus-visible, .choice:focus-visible { outline: 3px solid #ffd166; outline-offset: 3px; }
+    .card.flipped, .card.matched { transform: rotateY(180deg); }
+    .face { position: absolute; inset: 0; display: grid; place-items: center; border: 1px solid #50628d; border-radius: inherit; backface-visibility: hidden; }
+    .front { background: linear-gradient(145deg, #334779, #202e51); color: #c6d3ff; font-size: clamp(1rem, 5.5vw, 1.9rem); box-shadow: 0 5px 12px #070c1a66; }
+    .back { transform: rotateY(180deg); border-color: #8199ff; background: linear-gradient(145deg, #e8edff, #bdcbff); color: #1a2440; font-size: clamp(1.25rem, 7vw, 2.7rem); }
+    .card.matched .back { border-color: #5be0b2; background: linear-gradient(145deg, #c9ffeb, #78e9c0); }
+    .card:disabled { cursor: default; }
+    .message { min-height: 1.5em; margin: 12px 0; color: #c9d4f4; font-weight: 650; }
+    .game-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .secondary { padding: 10px 16px; border: 1px solid #465780; border-radius: 999px; background: #1a2541; color: #eef1ff; font-weight: 750; cursor: pointer; }
+    @media (max-width: 380px) { body { padding: 13px; } .levels { gap: 7px; } .level { min-height: 76px; } .stat { min-width: 0; flex: 1; padding-inline: 7px; } }
+    @media (max-height: 680px) and (orientation: landscape) { body { padding: 9px; } .app { width: min(100%, 740px); } .game-layout { display: grid; grid-template-columns: minmax(230px, .8fr) minmax(280px, 1.2fr); align-items: center; gap: 20px; } .game-layout .board { width: min(100%, 370px); } .game-layout .game-info { grid-column: 1; grid-row: 1; } .game-layout .board { grid-column: 2; grid-row: 1 / span 3; } .stats { margin-bottom: 8px; } .game-subtitle { margin-bottom: 8px; } .message { margin: 8px 0; } }
+    @media (max-width: 420px) { .board { gap: 5px; } .card { border-radius: 9px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; } }
+  </style>
+  <script src="https://www.youtube.com/game_api/v1"></script>
+</head>
+<body>
+  <main class="app">
+    <section id="home" class="screen" aria-labelledby="title">
+      <div class="hero-icon" aria-hidden="true">🪐</div>
+      <p class="eyebrow">Um jogo de combinar pares</p>
+      <h1 id="title">Memória<br>Cósmica</h1>
+      <p class="subtitle">Vire as cartas, encontre os pares e explore o espaço no seu ritmo.</p>
+      <div class="menu-options">
+        <button id="campaign-button" class="menu-card" type="button">
+          <span class="menu-icon" aria-hidden="true">🚀</span>
+          <span class="menu-copy"><strong>Modo campanha</strong><small>Supere as fases para abrir novos desafios.</small></span>
+        </button>
+        <button id="free-button" class="menu-card" type="button">
+          <span class="menu-icon" aria-hidden="true">🎮</span>
+          <span class="menu-copy"><strong>Jogo separado</strong><small>Uma partida rápida, só para se divertir.</small></span>
+        </button>
+      </div>
+      <p class="footnote">Seu progresso da campanha fica salvo neste dispositivo.</p>
+    </section>
+
+    <section id="campaign" class="screen" aria-labelledby="campaign-title" hidden>
+      <header class="topline"><button class="back-button" data-screen="home" type="button">← Início</button><p class="eyebrow">Modo campanha</p></header>
+      <h2 id="campaign-title">Mapa espacial</h2>
+      <p class="campaign-intro">Complete uma fase para liberar a próxima.</p>
+      <nav class="session-nav" aria-label="Sessões da campanha">
+        <button id="previous-session" class="session-arrow" type="button" aria-label="Sessão anterior" hidden>‹</button>
+        <strong id="session-title">Sessão 1</strong>
+        <button id="next-session" class="session-arrow" type="button" aria-label="Próxima sessão" hidden>›</button>
+      </nav>
+      <div id="levels" class="levels" aria-label="Fases da campanha"></div>
+      <p id="campaign-progress" class="footnote"></p>
+    </section>
+
+    <section id="free-setup" class="screen" aria-labelledby="free-title" hidden>
+      <header class="topline"><button class="back-button" data-screen="home" type="button">← Início</button><p class="eyebrow">Jogo separado</p></header>
+      <h2 id="free-title">Partida livre</h2>
+      <p class="campaign-intro">Escolha o tamanho do desafio e jogue sem fases.</p>
+      <p class="section-label">Quantidade de pares</p>
+      <div class="free-settings" role="group" aria-label="Quantidade de pares">
+        <button class="choice" data-pairs="6" aria-pressed="true" type="button">6 pares · fácil</button>
+        <button class="choice" data-pairs="8" aria-pressed="false" type="button">8 pares · médio</button>
+        <button class="choice" data-pairs="12" aria-pressed="false" type="button">12 pares · difícil</button>
+      </div>
+      <button id="start-free" class="primary" type="button">Começar partida</button>
+    </section>
+
+    <section id="game" class="screen" aria-labelledby="game-title" hidden>
+      <header class="topline"><button id="game-back" class="back-button" type="button">← Voltar</button><p id="mode-label" class="eyebrow">Partida livre</p></header>
+      <div class="game-layout">
+        <div class="game-info">
+          <h2 id="game-title" class="game-title">Memória Cósmica</h2>
+          <p id="game-subtitle" class="game-subtitle">Encontre todos os pares!</p>
+          <section class="stats" aria-label="Estatísticas da partida">
+            <div class="stat"><span>Jogadas</span><strong id="moves">0</strong></div>
+            <div class="stat"><span id="timer-label">Tempo</span><strong id="timer">00:00</strong></div>
+            <div class="stat"><span>Pares</span><strong id="pairs">0/6</strong></div>
+          </section>
+          <p id="message" class="message" aria-live="polite">Toque em uma carta para começar.</p>
+          <div class="game-actions"><button id="restart" class="primary" type="button">Jogar de novo</button><button id="next-level" class="primary" type="button" hidden>Próxima fase</button><button id="choose-mode" class="secondary" type="button">Trocar modo</button></div>
+        </div>
+        <section id="board" class="board" aria-label="Tabuleiro do jogo da memória"></section>
+      </div>
+    </section>
+  </main>
+  <script>
+    (() => {
+      const symbols = ['🪐', '🚀', '🌙', '👽', '☄️', '⭐', '🛸', '🌍', '🌌', '🛰️', '🌠', '👾'];
+      const chapters = [
+        { name: 'Bloco 1 · Exploração', levels: [
+          ['Lua Nova', 4], ['Órbita', 4], ['Chuva de Estrelas', 5], ['Planeta Azul', 5], ['Nebulosa', 6],
+          ['Anel de Saturno', 6], ['Via Láctea', 7], ['Buraco Negro', 8], ['Estação Espacial', 9], ['Cometa Errante', 10],
+          ['Supernova', 11], ['Fim do Universo', 12]
+        ].map(([name, pairs]) => ({ name, pairs, mode: 'classic' })) },
+        { name: 'Bloco 2 · Limite de jogadas', levels: [
+          ['Treino Lunar', 4, 10], ['Rota de Fuga', 4, 9], ['Campo de Asteroides', 5, 9], ['Pouso Arriscado', 5, 8],
+          ['Órbita Instável', 6, 8], ['Último Combustível', 6, 7], ['Desafio Nebuloso', 12, 30], ['Chuva Cósmica', 12, 29],
+          ['Setor Perigoso', 12, 28], ['Horizonte de Eventos', 12, 27], ['Tempestade Solar', 12, 26], ['Missão Impossível', 12, 25]
+        ].map(([name, pairs, moveLimit]) => ({ name, pairs, mode: 'moves', moveLimit })) },
+        { name: 'Bloco 3 · Contra o tempo', levels: [
+          ['Contagem Regressiva', 8, 100], ['Estrelas Cadentes', 8, 90], ['Fuga da Nebulosa', 9, 85], ['Alerta Vermelho', 9, 80],
+          ['Sol em Colapso', 10, 75], ['Órbita Final', 10, 70], ['Ruptura Espacial', 12, 75], ['Supernova Iminente', 12, 68],
+          ['Colisão Galáctica', 12, 62], ['Sem Tempo a Perder', 12, 56], ['Última Fronteira', 12, 50], ['O Fim do Tempo', 12, 45]
+        ].map(([name, pairs, timeLimit]) => ({ name, pairs, mode: 'time', timeLimit })) }
+      ];
+      const campaignLevels = chapters.flatMap(chapter => chapter.levels);
+      const levelCount = campaignLevels.length;
+      const progressKey = 'cosmicMemoryUnlockedV2';
+      const legacyProgressKey = 'cosmicMemoryUnlocked';
+      const chapterStarts = chapters.map((_, index) => chapters.slice(0, index).reduce((sum, chapter) => sum + chapter.levels.length, 1));
+      const screens = ['home', 'campaign', 'free-setup', 'game'];
+      const board = document.querySelector('#board');
+      const movesEl = document.querySelector('#moves');
+      const timerEl = document.querySelector('#timer');
+      const pairsEl = document.querySelector('#pairs');
+      const messageEl = document.querySelector('#message');
+      const levelsEl = document.querySelector('#levels');
+      const progressEl = document.querySelector('#campaign-progress');
+      let first = null, locked = false, ended = false, moves = 0, pairs = 0, pairGoal = 6;
+      let startedAt = 0, deadline = 0, timerId = 0, selectedPairs = 6, currentLevel = null, previousScreen = 'home', syncedUnlocked = 1, currentChapter = 0;
+      let cloudLoadPromise = Promise.resolve(false), gamePaused = false, clockStarted = false, elapsedBeforePause = 0, remainingOnPause = 0;
+      let mismatchTimerId = 0, mismatchStartedAt = 0, mismatchRemaining = 800, pendingMismatch = null, audioEnabled = false;
+
+      function inPlayables() { return Boolean(window.ytgame?.IN_PLAYABLES_ENV); }
+
+      function unlockedLevel() {
+        if (inPlayables()) return Math.max(1, Math.min(levelCount + 1, syncedUnlocked));
+        let localUnlocked = 1;
+        try {
+          const currentSave = localStorage.getItem(progressKey);
+          if (currentSave !== null) localUnlocked = Number(currentSave) || 1;
+          else {
+            const oldSave = Number(localStorage.getItem(legacyProgressKey)) || 1;
+            localUnlocked = oldSave >= 9 ? oldSave + 2 : oldSave;
+            localStorage.setItem(progressKey, String(Math.min(levelCount + 1, localUnlocked)));
+          }
+        } catch (_) {}
+        return Math.max(1, Math.min(levelCount + 1, Math.max(localUnlocked, syncedUnlocked)));
+      }
+
+      function persistProgressValue(value) {
+        syncedUnlocked = Math.max(syncedUnlocked, value);
+        if (!inPlayables()) {
+          try { localStorage.setItem(progressKey, String(syncedUnlocked)); } catch (_) {}
+          return;
+        }
+        try {
+          cloudLoadPromise.then(async loaded => {
+            if (!loaded || !window.ytgame?.game?.saveData) return;
+            try { await window.ytgame.game.saveData(JSON.stringify({ version: 2, unlockedLevel: syncedUnlocked })); }
+            catch (_) { try { window.ytgame.health?.logWarning?.(); } catch (_) {} }
+          });
+        } catch (_) {}
+      }
+
+      function saveProgress(level) {
+        persistProgressValue(Math.min(levelCount + 1, Math.max(unlockedLevel(), level + 1)));
+      }
+
+      async function loadPlayableProgress() {
+        try {
+          if (!inPlayables() || !window.ytgame.game?.loadData) return false;
+          const serialized = await window.ytgame.game.loadData();
+          const saved = JSON.parse(serialized || '{}');
+          const storedLevel = Number(saved.unlockedLevel) || 1;
+          const migratedLevel = saved.version === 2 || storedLevel < 9 ? storedLevel : storedLevel + 2;
+          syncedUnlocked = Math.max(syncedUnlocked, Math.min(levelCount + 1, migratedLevel));
+          if (!document.querySelector('#campaign').hidden) { currentChapter = chapterForLevel(unlockedLevel()); renderLevels(); }
+          return true;
+        } catch (_) { return false; }
+      }
+
+      function showScreen(name) {
+        screens.forEach(id => { document.querySelector(`#${id}`).hidden = id !== name; });
+        if (name !== 'game') stopTimer();
+        if (name === 'campaign') {
+          currentChapter = chapterForLevel(unlockedLevel());
+          renderLevels();
+        }
+      }
+
+      function chapterForLevel(level) {
+        let index = 0;
+        chapterStarts.forEach((start, chapterIndex) => { if (level >= start) index = chapterIndex; });
+        return index;
+      }
+
+      function renderLevels() {
+        const unlocked = unlockedLevel();
+        levelsEl.replaceChildren();
+        const chapter = chapters[currentChapter];
+        const start = chapterStarts[currentChapter];
+        document.querySelector('#session-title').textContent = chapter.name;
+        const previousButton = document.querySelector('#previous-session');
+        const nextButton = document.querySelector('#next-session');
+        previousButton.hidden = currentChapter === 0;
+        nextButton.hidden = currentChapter >= chapters.length - 1 || unlocked < chapterStarts[currentChapter + 1];
+        chapter.levels.forEach((level, offset) => {
+          const number = start + offset;
+          const button = document.createElement('button');
+          button.type = 'button'; button.className = `level${number < unlocked ? ' completed' : ''}`;
+          button.disabled = number > unlocked;
+          button.setAttribute('aria-label', `Fase ${number}: ${level.name}${number > unlocked ? ', bloqueada' : ''}`);
+          button.innerHTML = `<span class="level-number">Fase ${String(number).padStart(2, '0')}</span><span class="level-name"></span>${number < unlocked ? '<span class="level-mark" aria-hidden="true">✓</span>' : ''}`;
+          button.querySelector('.level-name').textContent = level.name;
+          button.addEventListener('click', () => startGame('campaign', number));
+          levelsEl.append(button);
+        });
+        progressEl.textContent = `Fases liberadas: ${Math.min(unlocked, levelCount)} de ${levelCount}`;
+      }
+
+      function stopTimer() { window.clearInterval(timerId); timerId = 0; clockStarted = false; }
+      function updateTimer() {
+        if (gamePaused || ended) return;
+        if (currentLevel !== null && campaignLevels[currentLevel - 1].mode === 'time') {
+          const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+          timerEl.textContent = `${String(Math.floor(remaining / 60)).padStart(2, '0')}:${String(remaining % 60).padStart(2, '0')}`;
+          if (remaining === 0) endGame(false, 'O tempo acabou! Tente a fase novamente.');
+        } else {
+          const seconds = Math.floor((elapsedBeforePause + Date.now() - startedAt) / 1000);
+          timerEl.textContent = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+        }
+      }
+      function startTimer() {
+        if (timerId || gamePaused) return;
+        startedAt = Date.now();
+        clockStarted = true;
+        if (currentLevel !== null && campaignLevels[currentLevel - 1].mode === 'time') deadline = startedAt + campaignLevels[currentLevel - 1].timeLimit * 1000;
+        timerId = window.setInterval(updateTimer, 250);
+      }
+
+      function scheduleMismatch(callback) {
+        mismatchStartedAt = Date.now();
+        mismatchTimerId = window.setTimeout(() => {
+          mismatchTimerId = 0; mismatchRemaining = 800; pendingMismatch = null; callback();
+        }, mismatchRemaining);
+      }
+
+      function pauseGame() {
+        if (gamePaused) return;
+        gamePaused = true;
+        if (timerId) {
+          window.clearInterval(timerId); timerId = 0;
+          if (currentLevel !== null && campaignLevels[currentLevel - 1].mode === 'time') remainingOnPause = Math.max(0, deadline - Date.now());
+          else elapsedBeforePause += Date.now() - startedAt;
+        }
+        if (mismatchTimerId) {
+          window.clearTimeout(mismatchTimerId); mismatchTimerId = 0;
+          mismatchRemaining = Math.max(0, mismatchRemaining - (Date.now() - mismatchStartedAt));
+        }
+        if (currentLevel !== null) persistProgressValue(unlockedLevel());
+      }
+
+      function resumeGame() {
+        if (!gamePaused) return;
+        gamePaused = false;
+        if (clockStarted) {
+          startedAt = Date.now();
+          if (currentLevel !== null && campaignLevels[currentLevel - 1].mode === 'time') deadline = Date.now() + remainingOnPause;
+          timerId = window.setInterval(updateTimer, 250);
+        }
+        if (pendingMismatch) scheduleMismatch(pendingMismatch);
+      }
+
+      function startGame(mode, level = null, freePairs = selectedPairs) {
+        stopTimer(); first = null; locked = false; ended = false; gamePaused = false; clockStarted = false; elapsedBeforePause = 0; remainingOnPause = 0; moves = 0; pairs = 0;
+        currentLevel = mode === 'campaign' ? level : null;
+        document.querySelector('#restart').hidden = false;
+        document.querySelector('#next-level').hidden = true;
+        const levelInfo = mode === 'campaign' ? campaignLevels[level - 1] : null;
+        pairGoal = levelInfo ? levelInfo.pairs : freePairs;
+        previousScreen = mode === 'campaign' ? 'campaign' : 'free-setup';
+        movesEl.textContent = levelInfo?.mode === 'moves' ? `0/${levelInfo.moveLimit}` : '0';
+        pairsEl.textContent = `0/${pairGoal}`; timerEl.textContent = levelInfo?.mode === 'time' ? formatTime(levelInfo.timeLimit) : '00:00';
+        messageEl.textContent = 'Toque em uma carta para começar.';
+        document.querySelector('#mode-label').textContent = mode === 'campaign' ? `Fase ${level} · ${levelInfo.name}` : 'Partida livre';
+        document.querySelector('#game-subtitle').textContent = levelInfo?.mode === 'moves'
+          ? `${pairGoal} pares · até ${levelInfo.moveLimit} jogadas.`
+          : levelInfo?.mode === 'time' ? `${pairGoal} pares · termine antes que o tempo acabe.`
+          : mode === 'campaign' ? `${pairGoal} pares para completar esta fase.` : 'Encontre todos os pares!';
+        document.querySelector('#timer-label').textContent = levelInfo?.mode === 'time' ? 'Restante' : 'Tempo';
+        board.style.setProperty('--columns', pairGoal > 8 ? '6' : '4');
+        const deck = [...symbols.slice(0, pairGoal), ...symbols.slice(0, pairGoal)].sort(() => Math.random() - 0.5);
+        board.replaceChildren();
+        deck.forEach((symbol, index) => {
+          const card = document.createElement('button');
+          card.type = 'button'; card.className = 'card'; card.dataset.symbol = symbol;
+          card.setAttribute('aria-label', `Carta ${index + 1}, fechada`);
+          card.innerHTML = '<span class="face front" aria-hidden="true">✦</span><span class="face back" aria-hidden="true"></span>';
+          card.querySelector('.back').textContent = symbol;
+          card.addEventListener('click', () => flip(card, index));
+          board.append(card);
+        });
+        showScreen('game');
+      }
+
+      function formatTime(seconds) {
+        return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+      }
+
+      function endGame(won, failureMessage = '') {
+        stopTimer(); ended = true;
+        if (mismatchTimerId) { window.clearTimeout(mismatchTimerId); mismatchTimerId = 0; pendingMismatch = null; }
+        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+        if (!won) {
+          locked = true;
+          messageEl.textContent = failureMessage;
+          document.querySelector('#restart').hidden = false;
+          document.querySelector('#next-level').hidden = true;
+        } else if (currentLevel !== null) {
+          saveProgress(currentLevel);
+          const unlocked = unlockedLevel();
+          document.querySelector('#restart').hidden = true;
+          const chapterEnd = currentLevel === levelCount || chapterStarts.includes(currentLevel + 1);
+          document.querySelector('#next-level').hidden = chapterEnd;
+          messageEl.textContent = currentLevel === levelCount
+            ? `Campanha concluída! ${moves} jogadas · ${timerEl.textContent} 🎉`
+            : `Fase concluída! ${moves} jogadas · ${timerEl.textContent}. Fase ${unlocked} liberada! 🎉`;
+        } else messageEl.textContent = `Você venceu em ${moves} jogadas e ${timerEl.textContent}! 🎉`;
+        if (won) {
+          try { if (window.ytgame?.engagement?.sendScore) window.ytgame.engagement.sendScore({ value: Math.max(0, 1000 - moves * 10 - elapsed) }); } catch (_) {}
+        }
+      }
+
+      function flip(card, index) {
+        if (ended || gamePaused || locked || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+        startTimer(); card.classList.add('flipped');
+        card.setAttribute('aria-label', `Carta ${index + 1}, ${card.dataset.symbol}`);
+        if (!first) { first = card; return; }
+        moves++;
+        const levelInfo = currentLevel === null ? null : campaignLevels[currentLevel - 1];
+        movesEl.textContent = levelInfo?.mode === 'moves' ? `${moves}/${levelInfo.moveLimit}` : String(moves);
+        const second = card;
+        if (first.dataset.symbol === second.dataset.symbol) {
+          first.classList.add('matched'); second.classList.add('matched'); first.disabled = true; second.disabled = true;
+          pairs++; pairsEl.textContent = `${pairs}/${pairGoal}`; first = null;
+          if (pairs === pairGoal) { endGame(true); return; }
+          if (levelInfo?.mode === 'moves' && moves >= levelInfo.moveLimit) {
+            endGame(false, 'Limite de jogadas atingido. Tente de novo!'); return;
+          }
+          messageEl.textContent = 'Par encontrado! Continue assim.';
+          return;
+        }
+        locked = true; messageEl.textContent = 'Não formou par. Tente de novo!';
+        const previous = first; first = null;
+        pendingMismatch = () => {
+          previous.classList.remove('flipped'); second.classList.remove('flipped');
+          previous.setAttribute('aria-label', `Carta ${Array.from(board.children).indexOf(previous) + 1}, fechada`);
+          second.setAttribute('aria-label', `Carta ${Array.from(board.children).indexOf(second) + 1}, fechada`);
+          if (levelInfo?.mode === 'moves' && moves >= levelInfo.moveLimit) endGame(false, 'Limite de jogadas atingido. Tente de novo!');
+          else if (!ended) locked = false;
+        };
+        mismatchRemaining = 800;
+        scheduleMismatch(pendingMismatch);
+      }
+
+      document.querySelector('#campaign-button').addEventListener('click', () => showScreen('campaign'));
+      document.querySelector('#previous-session').addEventListener('click', () => {
+        if (currentChapter > 0) { currentChapter--; renderLevels(); }
+      });
+      document.querySelector('#next-session').addEventListener('click', () => {
+        if (currentChapter < chapters.length - 1 && unlockedLevel() >= chapterStarts[currentChapter + 1]) { currentChapter++; renderLevels(); }
+      });
+      document.querySelector('#free-button').addEventListener('click', () => showScreen('free-setup'));
+      document.querySelectorAll('[data-screen="home"]').forEach(button => button.addEventListener('click', () => showScreen('home')));
+      document.querySelectorAll('.choice').forEach(button => button.addEventListener('click', () => {
+        selectedPairs = Number(button.dataset.pairs);
+        document.querySelectorAll('.choice').forEach(choice => choice.setAttribute('aria-pressed', String(choice === button)));
+      }));
+      document.querySelector('#start-free').addEventListener('click', () => startGame('free'));
+      document.querySelector('#restart').addEventListener('click', () => currentLevel === null ? startGame('free', null, pairGoal) : startGame('campaign', currentLevel));
+      document.querySelector('#next-level').addEventListener('click', () => {
+        if (currentLevel !== null && currentLevel < levelCount) startGame('campaign', currentLevel + 1);
+      });
+      document.querySelector('#game-back').addEventListener('click', () => showScreen(previousScreen));
+      document.querySelector('#choose-mode').addEventListener('click', () => showScreen('home'));
+      showScreen('home');
+      cloudLoadPromise = loadPlayableProgress();
+
+      try {
+        if (window.ytgame?.game) {
+          window.ytgame.game.firstFrameReady();
+          window.ytgame.game.gameReady();
+        }
+      } catch (_) {}
+      try {
+        if (window.ytgame?.system) {
+          audioEnabled = window.ytgame.system.isAudioEnabled();
+          window.ytgame.system.onAudioEnabledChange(enabled => { audioEnabled = enabled; });
+          window.ytgame.system.onPause(pauseGame);
+          window.ytgame.system.onResume(resumeGame);
+        }
+      } catch (_) {}
+    })();
+  </script>
+</body>
+</html>
